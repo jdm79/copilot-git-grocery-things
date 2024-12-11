@@ -157,7 +157,7 @@ const TodoApp: React.FC = () => {
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         placeholder='Edit todo'
-                        className='text-black w-full p-3 rounded-lg border bg-white'
+                        className='text-black w-full p-1 rounded-lg border bg-white'
                       />
                     </div>
                   </div>
@@ -174,7 +174,7 @@ const TodoApp: React.FC = () => {
                 <>
                   <div className='basis-4/6 p-1'>
                     <div className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full'>
-                      <p className='text-black w-full p-3 rounded-lg border bg-white'>
+                      <p className='text-black w-full p-1 rounded-lg border bg-white'>
                         {todo.text}
                       </p>
                       <p className='text-xs text-right'>
