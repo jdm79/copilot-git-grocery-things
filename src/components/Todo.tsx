@@ -121,22 +121,22 @@ const TodoApp: React.FC = () => {
           className='w-3/4 h-15 m-auto md:w-1/4'
         />
       </div>
-      <div className='flex flex-row mb-6 p-1 bg-blue-400'>
-        <div className='basis-3/4 p-1 '>
+      <div className='flex flex-row mb-6 bg-blue-400 pl-1'>
+        <div className='basis-5/6 pr-1'>
           <input
             type='text'
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
             placeholder='Add item to shopping list'
-            className=' text-black w-full p-3 rounded-lg border'
+            className=' text-black w-full p-3 rounded-lg border-8 border-black'
           />
         </div>
-        <div className='basis-1/4 p-1'>
+        <div className='basis-1/6 pr-1'>
           <button
             className='bg-green-400 text-white rounded-lg border border-white w-full h-full'
             onClick={() => addTodo()}
           >
-            Save
+            Add
           </button>
           <button></button>
         </div>
@@ -146,7 +146,7 @@ const TodoApp: React.FC = () => {
           .slice()
           .reverse()
           .map((todo) => (
-            <li key={todo.id} className='flex flex-row mb-3 p-1 '>
+            <li key={todo.id} className='flex flex-row '>
               {todo.isEditing ? (
                 <>
                   <div className='basis-3/4 p-1'>
@@ -182,7 +182,7 @@ const TodoApp: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <div className='basis-1/6 py-1'>
+                  <div className='basis-1/6 py-1 pr-1'>
                     <button
                       onClick={() => editTodo(todo.id, todo.text)}
                       className='bg-amber-300 text-black rounded-lg border border-white w-full h-full'
@@ -190,7 +190,7 @@ const TodoApp: React.FC = () => {
                       Edit
                     </button>
                   </div>
-                  <div className='basis-1/6 py-1'>
+                  <div className='basis-1/6 py-1 pr-1'>
                     <button
                       onClick={() => deleteTodo(todo.id)}
                       className='bg-red-500 text-white rounded-lg border border-white w-full h-full'
@@ -204,10 +204,10 @@ const TodoApp: React.FC = () => {
           ))}
       </ul>
       {todos.length > 0 && (
-        <div className='flex justify-center mb-4'>
+        <div className='flex justify-center mb-4 mt-8'>
           <button
             onClick={() => setShowModal(true)}
-            className='bg-red-500 text-white p-2 rounded-lg'
+            className='bg-red-500 text-white p-2 rounded-lg border border-white'
           >
             Clear All Todos
           </button>
