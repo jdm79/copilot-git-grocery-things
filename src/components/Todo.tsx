@@ -12,6 +12,7 @@ interface Todo {
   text: string;
   isEditing: boolean;
   date: Date;
+  edited?: boolean;
 }
 
 const currentDate = new Date();
@@ -46,7 +47,12 @@ const TodoApp: React.FC = () => {
     if (newTodo.trim() === "") return;
     const updatedTodos = [
       ...todos,
-      { id: Date.now(), text: newTodo, isEditing: false, date: new Date() },
+      {
+        id: Date.now(),
+        text: newTodo,
+        isEditing: false,
+        date: new Date(),
+      },
     ];
     setTodos(updatedTodos);
     setNewTodo("");
@@ -62,15 +68,22 @@ const TodoApp: React.FC = () => {
   const editTodo = (id: number, currentText: string) => {
     setEditText(currentText);
     const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, isEditing: true } : todo
+      todo.id === id ? { ...todo, edited: true, isEditing: true } : todo
     );
     setTodos(updatedTodos);
+    console.log(updatedTodos);
   };
 
   const saveTodo = (id: number) => {
     const updatedTodos = todos.map((todo) =>
       todo.id === id
-        ? { ...todo, text: editText, isEditing: false, date: new Date() }
+        ? {
+            ...todo,
+            text: editText,
+            isEditing: false,
+            date: new Date(),
+            edited: true,
+          }
         : todo
     );
     setTodos(updatedTodos);
@@ -177,9 +190,16 @@ const TodoApp: React.FC = () => {
                       <p className='text-black w-full p-1 rounded-lg border bg-white'>
                         {todo.text}
                       </p>
-                      <p className='text-xs text-right'>
-                        <ReactTimeAgo date={todo.date} locale='en-US' />
-                      </p>
+                      {todo.edited ? (
+                        <p className='text-xs text-right'>
+                          Edited:{" "}
+                          <ReactTimeAgo date={todo.date} locale='en-US' />
+                        </p>
+                      ) : (
+                        <p className='text-xs text-right'>
+                          <ReactTimeAgo date={todo.date} locale='en-US' />
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className='basis-1/6 py-1 pr-1'>
