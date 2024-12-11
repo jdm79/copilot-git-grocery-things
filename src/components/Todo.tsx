@@ -121,14 +121,14 @@ const TodoApp: React.FC = () => {
           className='w-3/4 h-15 m-auto md:w-1/4'
         />
       </div>
-      <div className='flex flex-row mb-6 bg-blue-400 pl-1'>
+      <div className='sticky bottom-0 flex flex-row mb-6 bg-blue-400 pl-1'>
         <div className='basis-5/6 pr-1'>
           <input
             type='text'
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
             placeholder='Add item to shopping list'
-            className=' text-black w-full p-3 rounded-lg border-8 border-black'
+            className=' text-black w-full p-3 rounded-lg border-white'
           />
         </div>
         <div className='basis-1/6 pr-1'>
