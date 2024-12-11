@@ -114,7 +114,7 @@ const TodoApp: React.FC = () => {
           )}
         </div>
       </div>{" "}
-      <div className='content flex py-2 m-auto gap-2 bg-blue-400'>
+      <div className='content flex py-2 m-auto bg-blue-400'>
         <img
           src={"/images/ggf.png"}
           alt='git grocery things logo'
@@ -146,7 +146,7 @@ const TodoApp: React.FC = () => {
           .slice()
           .reverse()
           .map((todo) => (
-            <li key={todo.id} className='flex flex-row mb-2 p-1 '>
+            <li key={todo.id} className='flex flex-row mb-3 p-1 '>
               {todo.isEditing ? (
                 <>
                   <div className='basis-3/4 p-1'>
