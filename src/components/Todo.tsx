@@ -2,6 +2,25 @@ import React, { useEffect, useState } from "react";
 import Footer from "./Footer";
 import ReactTimeAgo from "react-time-ago";
 import TimeAgo from "javascript-time-ago";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 
 import en from "javascript-time-ago/locale/en";
 
@@ -10,7 +29,6 @@ TimeAgo.addDefaultLocale(en);
 interface Todo {
   id: number;
   text: string;
-  isEditing: boolean;
   date: Date;
   edited?: boolean;
 }
@@ -30,16 +48,127 @@ const weekday = [
 
 const day = weekday[d];
 
+interface SortableTodoItemProps {
+  todo: Todo;
+  onEdit: (id: number, text: string) => void;
+  onDelete: (id: number) => void;
+}
+
+const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDelete }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: todo.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`flex flex-row ${isDragging ? 'z-50' : ''}`}
+    >
+      <div className='basis-4/6 p-1'>
+        <div className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full'>
+          <div className='flex items-center gap-2'>
+            <div
+              {...attributes}
+              {...listeners}
+              className='cursor-grab active:cursor-grabbing touch-none p-1 hover:bg-gray-700 rounded'
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="text-gray-400">
+                <circle cx="3" cy="3" r="1"/>
+                <circle cx="9" cy="3" r="1"/>
+                <circle cx="3" cy="6" r="1"/>
+                <circle cx="9" cy="6" r="1"/>
+                <circle cx="3" cy="9" r="1"/>
+                <circle cx="9" cy="9" r="1"/>
+              </svg>
+            </div>
+            <p className='text-black w-full p-1 rounded-lg border bg-white flex-1'>
+              {todo.text}
+            </p>
+          </div>
+          {todo.edited ? (
+            <p className='text-xs text-right'>
+              Edited:{" "}
+              {todo.date && !isNaN(new Date(todo.date).getTime()) ? (
+                <ReactTimeAgo date={todo.date} locale='en-US' />
+              ) : (
+                'just now'
+              )}
+            </p>
+          ) : (
+            <p className='text-xs text-right'>
+              {todo.date && !isNaN(new Date(todo.date).getTime()) ? (
+                <ReactTimeAgo date={todo.date} locale='en-US' />
+              ) : (
+                'just now'
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className='basis-1/6 py-1 pr-1'>
+        <button
+          onClick={() => onEdit(todo.id, todo.text)}
+          className='bg-amber-300 text-black rounded-lg border border-white w-full h-full'
+        >
+          Edit
+        </button>
+      </div>
+      <div className='basis-1/6 py-1 pr-1'>
+        <button
+          onClick={() => onDelete(todo.id)}
+          className='bg-red-500 text-white rounded-lg border border-white w-full h-full'
+        >
+          Delete
+        </button>
+      </div>
+    </li>
+  );
+};
+
 const TodoApp: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState<string>("");
   const [editText, setEditText] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
+  const [deletingTodoId, setDeletingTodoId] = useState<number | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (localStorage.getItem("localItems")) {
       const storedList = JSON.parse(localStorage.getItem("localItems") || "[]");
-      setTodos(storedList);
+      const todosWithDates = storedList.map((todo: any) => {
+        const parsedDate = new Date(todo.date);
+        return {
+          ...todo,
+          date: isNaN(parsedDate.getTime()) ? new Date() : parsedDate,
+        };
+      });
+      setTodos(todosWithDates);
     }
   }, []);
 
@@ -50,7 +179,6 @@ const TodoApp: React.FC = () => {
       {
         id: Date.now(),
         text: newTodo,
-        isEditing: false,
         date: new Date(),
       },
     ];
@@ -59,28 +187,53 @@ const TodoApp: React.FC = () => {
     localStorage.setItem("localItems", JSON.stringify(updatedTodos));
   };
 
-  const deleteTodo = (id: number) => {
-    const updatedTodos = todos.filter((todo) => todo.id !== id);
+  const openDeleteModal = (id: number) => {
+    setDeletingTodoId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTodo = () => {
+    if (deletingTodoId === null) return;
+
+    const updatedTodos = todos.filter((todo) => todo.id !== deletingTodoId);
     setTodos(updatedTodos);
     localStorage.setItem("localItems", JSON.stringify(updatedTodos));
+    setDeletingTodoId(null);
+    setShowDeleteModal(false);
+  };
+
+  const cancelDelete = () => {
+    setDeletingTodoId(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = todos.findIndex((todo) => todo.id === active.id);
+      const newIndex = todos.findIndex((todo) => todo.id === over?.id);
+
+      const reorderedTodos = arrayMove(todos, oldIndex, newIndex);
+      setTodos(reorderedTodos);
+      localStorage.setItem("localItems", JSON.stringify(reorderedTodos));
+    }
   };
 
   const editTodo = (id: number, currentText: string) => {
     setEditText(currentText);
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, edited: true, isEditing: true } : todo
-    );
-    setTodos(updatedTodos);
-    console.log(updatedTodos);
+    setEditingTodoId(id);
+    setShowEditModal(true);
   };
 
-  const saveTodo = (id: number) => {
+  const saveTodo = () => {
+    if (editingTodoId === null) return;
+
     const updatedTodos = todos.map((todo) =>
-      todo.id === id
+      todo.id === editingTodoId
         ? {
             ...todo,
             text: editText,
-            isEditing: false,
             date: new Date(),
             edited: true,
           }
@@ -88,7 +241,15 @@ const TodoApp: React.FC = () => {
     );
     setTodos(updatedTodos);
     setEditText("");
+    setEditingTodoId(null);
+    setShowEditModal(false);
     localStorage.setItem("localItems", JSON.stringify(updatedTodos));
+  };
+
+  const cancelEdit = () => {
+    setEditText("");
+    setEditingTodoId(null);
+    setShowEditModal(false);
   };
 
   const clearTodos = () => {
@@ -154,75 +315,27 @@ const TodoApp: React.FC = () => {
           <button></button>
         </div>
       </div>
-      <ul className='flex flex-col bg-blue-400'>
-        {todos
-          .slice()
-          .reverse()
-          .map((todo) => (
-            <li key={todo.id} className='flex flex-row '>
-              {todo.isEditing ? (
-                <>
-                  <div className='basis-3/4 p-1'>
-                    <div className='text-white bg-black w-full border rounded-lg pb-3 pt-1 px-3 break-words h-full'>
-                      <input
-                        type='text'
-                        maxLength={100}
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        placeholder='Edit todo'
-                        className='text-black w-full p-1 rounded-lg border bg-white'
-                      />
-                    </div>
-                  </div>
-                  <div className='basis-1/4 pr-2 py-1'>
-                    <button
-                      className='bg-amber-300 text-black rounded-lg border border-black w-full h-full'
-                      onClick={() => saveTodo(todo.id)}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className='basis-4/6 p-1'>
-                    <div className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full'>
-                      <p className='text-black w-full p-1 rounded-lg border bg-white'>
-                        {todo.text}
-                      </p>
-                      {todo.edited ? (
-                        <p className='text-xs text-right'>
-                          Edited:{" "}
-                          <ReactTimeAgo date={todo.date} locale='en-US' />
-                        </p>
-                      ) : (
-                        <p className='text-xs text-right'>
-                          <ReactTimeAgo date={todo.date} locale='en-US' />
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className='basis-1/6 py-1 pr-1'>
-                    <button
-                      onClick={() => editTodo(todo.id, todo.text)}
-                      className='bg-amber-300 text-black rounded-lg border border-white w-full h-full'
-                    >
-                      Edit
-                    </button>
-                  </div>
-                  <div className='basis-1/6 py-1 pr-1'>
-                    <button
-                      onClick={() => deleteTodo(todo.id)}
-                      className='bg-red-500 text-white rounded-lg border border-white w-full h-full'
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
-            </li>
-          ))}
-      </ul>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={todos.slice().reverse()} strategy={verticalListSortingStrategy}>
+          <ul className='flex flex-col bg-blue-400'>
+            {todos
+              .slice()
+              .reverse()
+              .map((todo) => (
+                <SortableTodoItem
+                  key={todo.id}
+                  todo={todo}
+                  onEdit={editTodo}
+                  onDelete={openDeleteModal}
+                />
+              ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
       {todos.length > 0 && (
         <div className='flex justify-center mb-4 mt-8'>
           <button
@@ -251,6 +364,64 @@ const TodoApp: React.FC = () => {
                 className='bg-red-500 text-white p-2 rounded-lg'
               >
                 Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showEditModal && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4'>
+          <div className='bg-white p-6 rounded-lg w-full max-w-md'>
+            <h2 className='text-black text-xl font-bold mb-4'>Edit Item</h2>
+            <textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder='Edit your todo item...'
+              className='w-full p-3 border border-gray-300 rounded-lg resize-none text-black'
+              rows={3}
+              maxLength={100}
+              autoFocus
+            />
+            <div className='text-right text-sm text-gray-500 mt-1'>
+              {editText.length}/100
+            </div>
+            <div className='flex justify-end gap-3 mt-6'>
+              <button
+                onClick={cancelEdit}
+                className='bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveTodo}
+                disabled={editText.trim() === ''}
+                className='bg-amber-400 text-black px-4 py-2 rounded-lg hover:bg-amber-500 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed'
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4'>
+          <div className='bg-white p-6 rounded-lg w-full max-w-md'>
+            <h2 className='text-black text-xl font-bold mb-4'>Delete Item</h2>
+            <p className='text-gray-600 mb-6'>
+              Are you sure you want to delete this item? This action cannot be undone.
+            </p>
+            <div className='flex justify-end gap-3'>
+              <button
+                onClick={cancelDelete}
+                className='bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteTodo}
+                className='bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors'
+              >
+                Delete
               </button>
             </div>
           </div>
