@@ -4,8 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Press Start 2P', 'monospace'],
-        'typewriter': ['Press Start 2P', 'monospace'],
+        'sans': ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },
