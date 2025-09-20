@@ -247,7 +247,7 @@ const TodoApp: React.FC = () => {
   };
 
   return (
-    <div className='text-white h-screen w-screen bg-blue-400 flex flex-col justify-between '>
+    <div className='text-white h-screen w-screen bg-blue-400 flex flex-col justify-between no-select'>
       <div className='text-center mb-1 text-md px-5 font-bold border-8 border-black md:border-white md:mt-2 md:rounded-lg bg-black w-full md:w-1/3 mx-auto p-1'>
         <div className='text-center font-bold text-white bg-black w-full md:w-fit mx-auto lowercase'>
           Today is <span className='text-yellow-300'>{day}</span>
