@@ -77,28 +77,16 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDel
       className={`flex flex-row ${isDragging ? 'z-50' : ''}`}
     >
       <div className='basis-4/6 p-1'>
-        <div className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full'>
-          <div className='flex items-center gap-2'>
-            <div
-              {...attributes}
-              {...listeners}
-              className='cursor-grab active:cursor-grabbing touch-none p-1 hover:bg-gray-700 rounded'
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="text-gray-400">
-                <circle cx="3" cy="3" r="1"/>
-                <circle cx="9" cy="3" r="1"/>
-                <circle cx="3" cy="6" r="1"/>
-                <circle cx="9" cy="6" r="1"/>
-                <circle cx="3" cy="9" r="1"/>
-                <circle cx="9" cy="9" r="1"/>
-              </svg>
-            </div>
-            <p className='text-black w-full p-1 rounded-lg border bg-white flex-1'>
-              {todo.text}
-            </p>
-          </div>
+        <div
+          {...attributes}
+          {...listeners}
+          className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full cursor-grab active:cursor-grabbing touch-none'
+        >
+          <p className='text-black w-full p-1 rounded-lg border bg-white'>
+            {todo.text}
+          </p>
           {todo.edited ? (
-            <p className='text-xs text-right'>
+            <p className='text-xs text-right my-1'>
               Edited:{" "}
               {todo.date && !isNaN(new Date(todo.date).getTime()) ? (
                 <ReactTimeAgo date={todo.date} locale='en-US' />
@@ -107,7 +95,7 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDel
               )}
             </p>
           ) : (
-            <p className='text-xs text-right'>
+            <p className='text-xs text-right my-1'>
               {todo.date && !isNaN(new Date(todo.date).getTime()) ? (
                 <ReactTimeAgo date={todo.date} locale='en-US' />
               ) : (
@@ -271,29 +259,32 @@ const TodoApp: React.FC = () => {
                 <span>
                   {" "}
                   there is{" "}
-                  <span className='text-yellow-300'>{todos.length}</span> item
-                  to buy
+                  <span className='text-yellow-300'>{todos.length}</span> thing
+                  to git done
                 </span>
               ) : (
                 <span>
                   {" "}
                   there are{" "}
-                  <span className='text-yellow-300'>{todos.length}</span> items
-                  to buy
+                  <span className='text-yellow-300'>{todos.length}</span> things
+                  to git done
                 </span>
               )}
             </h2>
           ) : (
-            <h2>nothing to buy</h2>
+            <h2>nothing to git done</h2>
           )}
         </div>
       </div>{" "}
-      <div className='content flex py-2 m-auto bg-blue-400'>
-        <img
-          src={"/images/ggf.png"}
-          alt='git grocery things logo'
-          className='w-3/4 h-15 m-auto md:w-1/4'
-        />
+      <div className='text-center mb-4'>
+        <pre className='text-black text-xs md:text-sm font-mono leading-tight'>
+{`┌─────────────────────┐
+│ ☑ Complete tasks    │
+│ ☐ Add new todos     │
+│ ☐ Stay organized    │
+│ ☑ Git things done!  │
+└─────────────────────┘`}
+        </pre>
       </div>
       <div className='sticky bottom-0 flex flex-row mb-6 bg-blue-400 pl-1'>
         <div className='basis-5/6 pr-1'>
@@ -301,7 +292,7 @@ const TodoApp: React.FC = () => {
             type='text'
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
-            placeholder='Add item to shopping list'
+            placeholder='Add thing to git done'
             className=' text-black w-full p-3 rounded-lg border-white'
           />
         </div>

@@ -2,7 +2,12 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'sans': ['Press Start 2P', 'monospace'],
+        'typewriter': ['Press Start 2P', 'monospace'],
+      },
+    },
   },
   plugins: [],
 };
