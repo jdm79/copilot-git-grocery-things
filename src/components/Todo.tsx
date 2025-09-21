@@ -131,7 +131,6 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDel
 
 const TodoApp: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [newTodo, setNewTodo] = useState<string>("");
   const [editText, setEditText] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
@@ -164,20 +163,6 @@ const TodoApp: React.FC = () => {
     }
   }, []);
 
-  const addTodo = () => {
-    if (newTodo.trim() === "") return;
-    const updatedTodos = [
-      ...todos,
-      {
-        id: Date.now(),
-        text: newTodo,
-        date: new Date(),
-      },
-    ];
-    setTodos(updatedTodos);
-    setNewTodo("");
-    localStorage.setItem("localItems", JSON.stringify(updatedTodos));
-  };
 
   const openDeleteModal = (id: number) => {
     setDeletingTodoId(id);
@@ -219,23 +204,39 @@ const TodoApp: React.FC = () => {
   };
 
   const saveTodo = () => {
-    if (editingTodoId === null) return;
+    if (editText.trim() === "") return;
 
-    const updatedTodos = todos.map((todo) =>
-      todo.id === editingTodoId
-        ? {
-            ...todo,
-            text: editText,
-            date: new Date(),
-            edited: true,
-          }
-        : todo
-    );
-    setTodos(updatedTodos);
+    if (editingTodoId === null) {
+      // Adding new todo
+      const updatedTodos = [
+        ...todos,
+        {
+          id: Date.now(),
+          text: editText,
+          date: new Date(),
+        },
+      ];
+      setTodos(updatedTodos);
+      localStorage.setItem("localItems", JSON.stringify(updatedTodos));
+    } else {
+      // Editing existing todo
+      const updatedTodos = todos.map((todo) =>
+        todo.id === editingTodoId
+          ? {
+              ...todo,
+              text: editText,
+              date: new Date(),
+              edited: true,
+            }
+          : todo
+      );
+      setTodos(updatedTodos);
+      localStorage.setItem("localItems", JSON.stringify(updatedTodos));
+    }
+
     setEditText("");
     setEditingTodoId(null);
     setShowEditModal(false);
-    localStorage.setItem("localItems", JSON.stringify(updatedTodos));
   };
 
   const cancelEdit = () => {
@@ -287,25 +288,17 @@ const TodoApp: React.FC = () => {
           className='mx-auto max-w-xs md:max-w-sm rounded-lg border-2 border-black'
         />
       </div>
-      <div className='sticky bottom-0 flex flex-row mb-6 bg-blue-400 pl-1'>
-        <div className='basis-5/6 pr-1'>
-          <input
-            type='text'
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            placeholder='Add thing to git done'
-            className=' text-black w-full p-3 rounded-lg border-white'
-          />
-        </div>
-        <div className='basis-1/6 pr-1'>
-          <button
-            className='bg-green-400 text-white rounded-lg border border-white w-full h-full'
-            onClick={() => addTodo()}
-          >
-            Add
-          </button>
-          <button></button>
-        </div>
+      <div className='flex justify-center mb-6'>
+        <button
+          onClick={() => {
+            setEditText("");
+            setEditingTodoId(null);
+            setShowEditModal(true);
+          }}
+          className='bg-green-400 text-white rounded-full border border-white w-16 h-16 flex items-center justify-center text-2xl font-bold hover:bg-green-500 transition-colors'
+        >
+          +
+        </button>
       </div>
       <DndContext
         sensors={sensors}
@@ -364,11 +357,13 @@ const TodoApp: React.FC = () => {
       {showEditModal && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4'>
           <div className='bg-white p-6 rounded-lg w-full max-w-md'>
-            <h2 className='text-black text-xl font-bold mb-4'>Edit Item</h2>
+            <h2 className='text-black text-xl font-bold mb-4'>
+              {editingTodoId ? 'Edit Item' : 'Add New Item'}
+            </h2>
             <textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              placeholder='Edit your todo item...'
+              placeholder={editingTodoId ? 'Edit your todo item...' : 'Add thing to git done...'}
               className='w-full p-3 border border-gray-300 rounded-lg resize-none text-black'
               rows={3}
               maxLength={100}
@@ -389,7 +384,7 @@ const TodoApp: React.FC = () => {
                 disabled={editText.trim() === ''}
                 className='bg-amber-400 text-black px-4 py-2 rounded-lg hover:bg-amber-500 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed'
               >
-                Save Changes
+                {editingTodoId ? 'Save Changes' : 'Add Item'}
               </button>
             </div>
           </div>
