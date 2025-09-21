@@ -4,8 +4,8 @@
 
 @layer base {
   html, body {
-    font-family: 'Inter', system-ui, sans-serif !important;
-    font-weight: 600 !important;
+    font-family: 'Roboto', system-ui, sans-serif !important;
+    font-weight: 800 !important;
   }
 }
 
@@ -17,6 +17,12 @@
     user-select: none !important;
     -webkit-touch-callout: none !important;
     -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .break-all-words {
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
   }
 }
 

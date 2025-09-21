@@ -80,9 +80,12 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDel
         <div
           {...attributes}
           {...listeners}
-          className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full cursor-grab active:cursor-grabbing touch-none'
+          className='text-white bg-black w-full border rounded-lg pb-1 pt-1 px-3 break-words h-full cursor-grab active:cursor-grabbing touch-none relative'
         >
-          <p className='text-black w-full p-1 rounded-lg border bg-white'>
+          <div className='absolute top-1 right-1 text-gray-400 text-xs'>
+            ⋮⋮
+          </div>
+          <p className='text-black w-full p-1 rounded-lg border bg-white pr-6 break-all-words'>
             {todo.text}
           </p>
           {todo.edited ? (
@@ -277,14 +280,11 @@ const TodoApp: React.FC = () => {
         </div>
       </div>{" "}
       <div className='text-center mb-4'>
-        <pre className='text-black text-xs md:text-sm font-mono leading-tight'>
-{`┌─────────────────────┐
-│ ☑ Complete tasks    │
-│ ☐ Add new todos     │
-│ ☐ Stay organized    │
-│ ☑ Git things done!  │
-└─────────────────────┘`}
-        </pre>
+        <img
+          src="/ggf.jpg"
+          alt="Git things done"
+          className='mx-auto max-w-xs md:max-w-sm rounded-lg border-2 border-black'
+        />
       </div>
       <div className='sticky bottom-0 flex flex-row mb-6 bg-blue-400 pl-1'>
         <div className='basis-5/6 pr-1'>
