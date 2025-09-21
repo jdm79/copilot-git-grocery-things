@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "./Footer";
 import ReactTimeAgo from "react-time-ago";
 import TimeAgo from "javascript-time-ago";
+import { wrapWords } from "../utils/wordWrap";
 import {
   DndContext,
   closestCenter,
@@ -86,7 +87,7 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDel
             ⋮⋮
           </div>
           <p className='text-black w-full p-1 rounded-lg border bg-white pr-6 break-all-words'>
-            {todo.text}
+            {wrapWords(todo.text)}
           </p>
           {todo.edited ? (
             <p className='text-xs text-right my-1'>
