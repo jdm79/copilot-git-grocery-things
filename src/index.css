@@ -20,7 +20,7 @@
   }
 
   .break-all-words {
-    word-break: break-all !important;
+    word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     hyphens: auto !important;
   }
