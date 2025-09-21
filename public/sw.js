@@ -1,11 +1,12 @@
-const CACHE_NAME = 'todo-app-v2';
+const CACHE_NAME = 'ggt-todo-v3';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/ggf.jpg'
 ];
 
 self.addEventListener('install', (event) => {
